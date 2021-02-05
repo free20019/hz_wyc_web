@@ -1,0 +1,211 @@
+<!--未营运车辆统计-->
+<template>
+  <div class="tw-template-wrapper">
+    <el-form :inline="true" :model="query" size="small" class="tw-query-bar" ref="queryBar">
+      <el-form-item>
+        <el-autocomplete
+          v-model="query.vehicleNumber"
+          placeholder="车牌号码"
+          :fetch-suggestions="handleQuerySearch"
+          @focus="handleCarfocus"
+          :trigger-on-focus="false"
+          clearable
+        ></el-autocomplete>
+      </el-form-item>
+      <el-form-item>
+        <el-select v-model="query.type">
+          <el-option label="全部" value="0"></el-option>
+          <el-option label="超过1个月未营运分析" value="1"></el-option>
+          <el-option label="超过3个月未营运分析" value="2"></el-option>
+          <el-option label="超过6个月未营运分析" value="3"></el-option>
+          <el-option label="超过一年未营运分析" value="4"></el-option>
+          <el-option label="未参与营运" value="5"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleQueryClick">查询</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleExportClick">导出</el-button>
+      </el-form-item>
+    </el-form>
+    <div class="tw-query-panel" ref="queryPanel">
+      <el-table
+        class="tw-table tw-moreinfo-table"
+        :data="table.data"
+        v-loading="table.loading"
+        border
+        height="calc(100% - 42px)"
+        stripe
+      >
+        <el-table-column type="index" align="center" label="序号" width="60"></el-table-column>
+        <el-table-column prop="AUTO_NUM" align="center" label="车牌号码" min-width="100"></el-table-column>
+        <el-table-column prop="OWNER" align="center" label="车辆所有人" width="270"></el-table-column>
+        <el-table-column prop="OWNER_TEL" align="center" label="联系电话" width="140"></el-table-column>
+        <el-table-column
+          prop="LICENSE_REGISTER_DATE"
+          align="center"
+          label="行驶证注册日期"
+          width="160"
+          :formatter="timeFormatter"
+        ></el-table-column>
+        <el-table-column
+          prop="START_DATE"
+          align="center"
+          label="有效开始日期"
+          width="160"
+          :formatter="timeFormatter"
+        ></el-table-column>
+        <el-table-column
+          prop="END_DATE"
+          align="center"
+          label="有效截止日期"
+          min-width="140"
+          :formatter="timeFormatter"
+          :resizable="false"
+        ></el-table-column>
+        <el-table-column
+          prop="LAST_TIME"
+          align="center"
+          label="最近营运时间"
+          width="140"
+          :resizable="false"
+          :formatter="timeFormatter"
+        ></el-table-column>
+        <el-table-column
+          prop="last_type"
+          align="center"
+          label="营运状态"
+          min-width="140"
+          :resizable="false"
+        ></el-table-column>
+      </el-table>
+      <el-pagination
+        background
+        :page-size="table.pageSize"
+        :current-page="table.currentPage"
+        :total="table.total"
+        @current-change="handleTablePageCurrentChange"
+      ></el-pagination>
+    </div>
+  </div>
+</template>
+
+<script>
+import _ from 'underscore'
+import axios from 'axios'
+import moment from 'moment'
+import { templateHeight } from '../../../assets/js/util'
+
+export default {
+  name: 'StatisticsUnoperatedVehicles',
+  data() {
+    return {
+      query: {
+        vehicleNumber: '',
+        type: '0'
+      },
+      table: {
+        loading: false,
+        data: [],
+        pageSize: 20,
+        currentPage: 1,
+        total: 0
+      }
+    }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      const elements = this.$refs['queryBar'].$el
+      templateHeight(this.$refs['queryPanel'], elements)
+      this.getDataList()
+    })
+  },
+  computed: {},
+  methods: {
+    /*接口*/
+    getDataList() {
+      this.table.loading = true
+      const { vehicleNumber, type } = this.query
+      const baseURL = this.baseURL
+      const postData =
+        `postData=` +
+        JSON.stringify({
+          vehino: vehicleNumber,
+          type: type,
+          pageSize: this.table.pageSize,
+          pageIndex: this.table.currentPage
+        })
+      axios.post('manage/findCarNotOperate', postData, { baseURL }).then(res => {
+        try {
+          let data = res.data
+          this.table.data = data.datas
+          this.table.total = parseInt(data.count)
+          setTimeout(() => {
+            this.table.loading = false
+          }, 500)
+        } catch (e) {}
+      })
+    },
+    //时间转换
+    timeFormatter(item, col, value) {
+      if (value != '') {
+        return moment(value).format('YYYY-MM-DD')
+      }
+    },
+    //车牌号码输入框输入后匹配信息
+    handleQuerySearch(query, cb) {
+      if (query.length >= 5) {
+        let idata = `postData={'vehino':'${query}'}`
+        axios
+          .post('manage/findNotOperateVehicleNo', idata, {
+            baseURL: this.baseURL
+          })
+          .then(({ data }) => {
+            for (let i = 0; i < data.vehino.length; i++) {
+              data.vehino[i].value = data.vehino[i].VehicleNo
+            }
+            cb(data.vehicleNo)
+          })
+      } else {
+        return
+      }
+    },
+    //车牌号码输入框聚焦事件
+    handleCarfocus() {
+      const { vehicleNumber } = this.query
+      if (vehicleNumber === '') this.query.vehicleNumber = '浙A'
+    },
+    /*事件*/
+    handleQueryClick() {
+      this.getDataList()
+    },
+    //分页
+    handleTablePageCurrentChange(index) {
+      this.table.currentPage = index
+      this.getDataList()
+    },
+    //导出
+    handleExportClick() {
+      this.$confirm('是否需要导出?', '提示', {
+        confirmButtonText: '是',
+        cancelButtonText: '否',
+        cancelButtonClass: 'el-button--danger',
+        closeOnClickModal: false,
+        type: 'info',
+        center: true
+      })
+        .then(() => {
+          window.open(
+            `${this.baseURL}manage/exportCarNotOperate?postData={'vehino':'${this.query.vehicleNumber}','type':'${
+              this.query.type
+            }','pageSize':'${this.table.pageSize}','pageIndex':'${this.table.currentPage}'}`
+          )
+        })
+        .catch(() => {})
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped></style>

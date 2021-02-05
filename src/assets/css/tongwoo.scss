@@ -1,0 +1,943 @@
+@import "variable";
+
+.tw-template {
+  &-wrapper {
+    height: calc(100% - 41px);
+    width: 100%;
+  }
+  &-body {
+    height: 100%;
+    transition: width 0.5s ease, margin-left 0.5s ease;
+  }
+}
+
+.tw-layout {
+  $layout_height: 50px;
+  $layout-left_width: 300px;
+  position: relative;
+  height: 100%;
+  &-header,
+  &-top {
+    height: $layout_height;
+    & + .tw-layout-left,
+    & ~ .tw-layout-left {
+      top: $layout_height;
+      height: calc(100% - #{$layout_height});
+    }
+    & ~ .tw-layout-body {
+      height: calc(100% - #{$layout_height});
+    }
+  }
+  &-left {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: $layout-left_width;
+    height: 100%;
+    //border-right: 1px solid borderColor_default;
+    box-sizing: border-box;
+    transition: width 0.5s ease;
+    & + .tw-layout-body {
+      width: calc(100% - #{$layout-left_width});
+      margin-left: $layout-left_width;
+    }
+  }
+  &-body {
+    height: 100%;
+    transition: width 0.5s ease, margin-left 0.5s ease;
+    overflow-y: hidden;
+  }
+  &-right {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 100%;
+    border-left: 1px solid $borderColor_default;
+  }
+}
+.tw-index-tabs {
+  .el-tabs__header {
+    margin: 0;
+  }
+  &.el-tabs--top .el-tabs__item.is-top:nth-child(2) {
+    padding-left: 20px;
+  }
+}
+.tw-query {
+  $height: 54px;
+  &-bar {
+    padding: $margin $margin 0 $margin;
+    border-bottom: 1px solid $borderColor_default;
+    .el-form-item {
+      margin-bottom: $margin;
+      &.el-form-item--mini,
+      &.el-form-item--small {
+        margin-bottom: $margin;
+      }
+    }
+    & + .tw-template-body {
+      height: calc(100% - #{$height});
+    }
+  }
+  &-panel {
+    height: calc(100% - #{$height});
+    width: 100%;
+    padding: $margin;
+    box-sizing: border-box;
+  }
+}
+
+.tw-map {
+  &-box {
+    height: 100%;
+  }
+  &-query-panel {
+    position: absolute;
+    top: 60px;
+    left: 80px;
+    width: 300px;
+    height: calc(100% - 250px);
+    min-height: 400px;
+    padding: $margin;
+    @include borderShadow;
+    background-color: #ffffff;
+  }
+  &-tool {
+    &-bar {
+      position: absolute;
+      line-height: 30px;
+      @include borderShadow;
+      background-color: #ffffff;
+    }
+
+    &-item {
+      display: inline-block;
+      margin: 0;
+      padding: 0 $margin;
+      user-select: none;
+
+      &:first-child {
+        border-top-left-radius: inherit;
+        border-bottom-left-radius: inherit;
+      }
+
+      &:last-child {
+        border-top-right-radius: inherit;
+        border-bottom-right-radius: inherit;
+      }
+
+      &:hover,
+      &.active {
+        color: #ffffff;
+        background-color: #0a5380;
+      }
+    }
+
+    &-right {
+      right: 0;
+      width: calc(1em + 2 * #{$margin});
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      line-height: 1.15;
+    }
+
+    &-right &-item {
+      display: block;
+      padding: $margin;
+
+      &:first-child {
+        border-top-right-radius: inherit;
+        border-bottom-left-radius: 0;
+      }
+
+      &:last-child {
+        border-top-right-radius: 0;
+        border-bottom-left-radius: inherit;
+      }
+    }
+
+    &-bottom {
+      top: auto;
+      left: 30px;
+      right: auto;
+      bottom: 0;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    &-bottom &-item {
+      &:hover {
+        color: #000000;
+        background-color: transparent;
+      }
+
+      &.el-form-item {
+        margin-bottom: 0;
+        &:last-child {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+}
+
+.tw-table {
+  &.no-highlight {
+    &.el-table--enable-row-hover .el-table__body tr:hover > td {
+      background-color: #ffffff;
+    }
+  }
+  tr {
+    transition: height 0.5s;
+    &:hover {
+      .cell {
+        white-space: normal;
+      }
+    }
+    .cell {
+      white-space: nowrap;
+    }
+  }
+  width: 100%;
+  margin-bottom: $margin;
+  &:last-child {
+    margin-bottom: 0;
+  }
+  .el-table__empty-block {
+    width: 100% !important;
+  }
+}
+.tw-page {
+  &-bar {
+    margin-bottom: $margin;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    //&.dynamicMontor li {
+    //  margin: 0;
+    //  padding: 0px;
+    //}
+  }
+}
+
+.tw-chart {
+  &-panel.echarts {
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.tw-tabs {
+  height: calc(100% - 10px);
+
+  .el-tab {
+    &s__header {
+      margin-bottom: 0;
+    }
+
+    &s__content {
+      height: calc(100% - 40px);
+    }
+
+    &-pane {
+      height: 100%;
+      padding: $margin;
+      box-sizing: border-box;
+    }
+  }
+}
+
+.tw-card {
+  &-full {
+    height: 100%;
+    box-sizing: border-box;
+    .el-card {
+      &__header {
+        + .el-card__body {
+          height: calc(100% - 50px);
+        }
+      }
+      &__body {
+        overflow: auto;
+        height: 100%;
+        box-sizing: border-box;
+      }
+    }
+  }
+}
+
+.tw-form {
+  @mixin formItem($width) {
+    .el-form-item {
+      &__label {
+        float: left;
+        width: $width;
+      }
+
+      &__content {
+        display: block;
+        margin-left: $width;
+      }
+    }
+  }
+  @mixin form() {
+    .el-form {
+      &-item {
+        &.tw-block {
+          display: block;
+          @include formItem(80px);
+
+          &.tw-size__150px {
+            @include formItem(150px);
+          }
+        }
+        margin-bottom: $margin;
+        &.el-form-item--mini,
+        &.el-form-item--small {
+          margin-bottom: $margin;
+        }
+      }
+    }
+  }
+  @include form;
+  padding: $margin $margin 0 $margin;
+  border-bottom: 1px solid $borderColor_default;
+}
+
+.tw-btn {
+  &-block {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+.tw-search-for {
+  $fontColor: #ffffff;
+  $backgroundColor: #409eff;
+  $backgroundColor__hover: #66b1ff;
+
+  .el-input-group__append {
+    border-color: $backgroundColor;
+    color: $fontColor;
+    background-color: $backgroundColor;
+
+    &:hover,
+    &:focus {
+      border-color: $backgroundColor__hover;
+      color: $fontColor;
+      background: $backgroundColor__hover;
+    }
+  }
+  .el-input__suffix {
+    position: absolute;
+    right: 0;
+    .el-button--small,
+    .el-button--small.is-round {
+      padding: 5px 25px 5px 15px;
+      line-height: 1.5;
+    }
+    .el-input__icon {
+      &:before {
+      }
+    }
+  }
+}
+
+.tw-list {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  list-style: none;
+
+  &-item {
+    position: relative;
+    line-height: 40px;
+    border-bottom: 1px solid #eeeeee;
+    cursor: pointer;
+
+    &:last-child {
+      border-bottom: none;
+    }
+    &:hover,
+    &.active {
+      background-color: #ccdffd;
+    }
+    &.title {
+      background: none;
+      cursor: auto;
+    }
+  }
+
+  &-suffix {
+    position: absolute;
+    top: 50%;
+    right: $margin;
+    transform: translateY(-50%);
+    &.el-button {
+      padding: 7px;
+      &:hover {
+        text-shadow: 0 0 6px #000000;
+      }
+    }
+  }
+
+  &-border {
+    border: 1px solid #eeeeee;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+}
+
+.tw-icon--prefix {
+  margin-right: $margin;
+}
+
+.tw-login {
+  &-title {
+    position: absolute;
+    top: calc(10% + 30px);
+    left: 50%;
+    font-size: 46px;
+    text-shadow: 0 0 12px #55a4b3;
+    white-space: nowrap;
+    color: #12beeb;
+    transform: translate(-50%, -50%);
+  }
+  &-box {
+    position: relative;
+    top: calc(50% - 50px);
+    left: calc(50% - 300px - 30px);
+    width: 300px;
+    transform: translate(-50%, -50%);
+  }
+  &-item {
+    margin-bottom: 20px;
+    &:last-child {
+      margin-bottom: 0;
+    }
+    .el-input__prefix {
+      margin-left: 3px;
+    }
+  }
+}
+
+.tw-scrollbar {
+  height: 100%;
+  &.tw-y {
+    .el-scrollbar__wrap {
+      overflow-x: hidden;
+    }
+  }
+  .el-scrollbar__view {
+    //height: 100%;
+  }
+}
+
+.tw-loading {
+  height: 50px;
+}
+
+.tw-footer-bar {
+  .el-form-item {
+    height: 30px;
+    margin-bottom: $margin;
+    &__label {
+      padding-right: 5px;
+      line-height: 30px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    &__content {
+      line-height: 30px;
+    }
+  }
+}
+
+.tw-text {
+  &-error {
+    color: #e81123;
+  }
+}
+
+/* ******过度动画****** */
+// 滑动面板 从左到右
+.mapQueryPanel {
+  &-enter-active,
+  &-leave-active {
+    transition: left 0.5s;
+  }
+  &-enter,
+  &-leave-to {
+    left: -350px;
+  }
+}
+.tw-tab-info {
+  .el-tabs__content {
+    height: 250px;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    .el-tab-pane {
+      height: 100%;
+    }
+    .tw-table {
+      height: 250px;
+    }
+  }
+}
+
+//显示loading
+.showLoading-enter-active,
+.showLoading-leave-active {
+  transition: height 0.3s ease, opacity 0.3s ease;
+}
+.showLoading-enter,
+.showLoading-leave-to {
+  height: 0;
+  opacity: 0;
+}
+
+.map-form {
+  .el-input {
+    width: 160px;
+  }
+}
+.scrollbar-macosx {
+  .el-input {
+    width: 250px;
+  }
+  .el-textarea {
+    width: 250px;
+    width: 250px;
+  }
+}
+.hz-form {
+  .el-form-item__label {
+    float: none;
+  }
+}
+.login-info {
+  display: block;
+  .el-input-group {
+    margin-top: 15px;
+    width: 30%;
+    height: 60px;
+  }
+  .el-input-group__append,
+  .el-input-group__prepend {
+    background-color: rgba(245, 245, 245, 0.1);
+    color: #00fff2;
+    letter-spacing: 1px;
+    font-weight: bold;
+    border: none;
+    font-size: 20px;
+  }
+  .el-input__inner {
+    height: 60px;
+    background-color: rgba(245, 245, 245, 0.1);
+    border: none;
+    color: #00fff2;
+    letter-spacing: 1px;
+    font-size: 16px;
+  }
+}
+.login-info {
+  .el-button {
+    color: #ffffff;
+    letter-spacing: 2px;
+    background-color: #01d5c9;
+    width: 200px;
+    height: 40px;
+    font-size: 20px;
+    font-weight: bold;
+    border: none;
+  }
+  &.yzm {
+    .el-input-group__prepend {
+      padding: 20px 10px 20px 5px;
+      letter-spacing: 0px;
+      width: 60px;
+    }
+  }
+}
+.tw-dialog {
+  .el-input {
+    width: 90%;
+  }
+  .el-date-editor.el-input {
+    width: 90%;
+  }
+  .el-select {
+    width: 100%;
+  }
+}
+.tw-tree {
+  &.el-tree {
+    height: 500px;
+    overflow-y: auto;
+  }
+}
+.yzm-input {
+  &.el-input {
+    width: calc((100% - 160px) / 2);
+    float: left;
+    .el-input__inner {
+      border-radius: 0px;
+    }
+  }
+}
+.tw-load-dialog {
+  &.el-dialog__wrapper {
+    padding: 100px;
+  }
+}
+
+.tw-menu {
+  & > .tw-menu-item {
+    height: 50px !important;
+    line-height: 50px !important;
+    &.active {
+      .tw-menu-link {
+        color: #02449e;
+        background-color: #e5eff9;
+      }
+    }
+    .tw-menu-link {
+      color: #ffffff;
+      padding-left: 0;
+      padding-right: 0;
+      &:hover {
+        color: #02449e;
+        background-color: #e5eff9;
+      }
+    }
+    .tw-icon {
+      font-size: 18px !important;
+      margin-left: 15px !important;
+      margin-right: 11px !important;
+    }
+  }
+  & > .tw-menu-group {
+    .tw-menu-title {
+      padding-left: 0;
+      padding-right: 0;
+    }
+    &:first-child {
+      padding-top: 20px;
+    }
+    & > .tw-menu-title {
+      height: 50px;
+      line-height: 50px;
+      &.active,
+      &.open,
+      &:hover {
+        color: #02449e;
+        background-color: #e5eff9;
+      }
+      .tw-icon {
+        font-size: 18px !important;
+        margin-left: 15px;
+        margin-right: 11px;
+      }
+    }
+  }
+}
+.tw-menu-panel {
+  padding: 10px 0;
+  background-color: #203051 !important;
+  .tw-menu-group {
+    .tw-menu-title {
+      &.active,
+      &.open,
+      &:hover {
+        background-color: #e5eff9;
+        color: #02449e;
+      }
+      padding-left: 25px;
+      height: 45px !important;
+      line-height: 45px !important;
+    }
+  }
+}
+.tw-menu {
+  background-color: #2a3d65;
+}
+.tw-map-tool {
+  .el-input {
+    width: 60%;
+  }
+}
+.tool {
+  &-input {
+    float: left;
+    height: 100%;
+    width: 60%;
+    .el-input {
+      height: 100%;
+      width: 100%;
+      .el-input__inner {
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+  &-btn {
+    float: left;
+    padding: 5px 10px;
+    &.cx {
+      //border-right: 1px solid #ffffff;
+    }
+    .el-button {
+      padding: 0;
+    }
+    .el-button--text {
+      &:hover {
+        color: #ffffff;
+      }
+      text-align: center;
+      color: #ffffff;
+    }
+  }
+}
+//车辆动态监控左侧
+.list-search {
+  position: relative;
+  height: 50px;
+}
+.list-input {
+  position: absolute;
+  left: 35px;
+  &.el-input {
+    position: absolute;
+    width: 192px;
+  }
+}
+.list-icon {
+  position: absolute;
+  left: 225px;
+  width: 40px;
+  height: 40px;
+  font-size: 40px;
+  color: #ffffff;
+  background-color: #18e2ff;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  text-align: center;
+  i {
+    font-size: 25px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+//特定区域监测
+.tw-map-left-panel {
+  .el-collapse-item__header {
+    padding-left: 60px;
+    color: #374873;
+    font-weight: 600;
+    &.is-active {
+      background-color: #c9e0f9;
+    }
+  }
+  .el-collapse-item__arrow {
+    margin: 0 75px 0 auto;
+  }
+}
+// 车辆动态监控
+.tw-tab {
+  float: left;
+}
+.map-tool {
+  float: left;
+  width: 603px;
+  .el-tabs__header {
+    box-sizing: border-box;
+    margin-bottom: 0;
+    border: none;
+    height: 50px;
+    background-color: #ffffff;
+  }
+  .el-tabs__nav-next,
+  .el-tabs__nav-prev {
+    line-height: 52px;
+    font-size: 26px;
+    color: #000000;
+  }
+  .el-tabs__item {
+    position: relative;
+    text-align: center;
+    padding: 0;
+    height: 50px;
+    width: 80px;
+    box-sizing: border-box;
+    color: inherit;
+    &.is-active {
+      background-color: #384a6e;
+      color: #ffffff;
+    }
+  }
+  &.el-tabs--card > .el-tabs__header .el-tabs__item.is-active {
+    border: none;
+  }
+  &.el-tabs--card > .el-tabs__header .el-tabs__item {
+    border-bottom: none;
+  }
+  &.el-tabs--card > .el-tabs__header {
+    border-bottom: none;
+  }
+  &.el-tabs--card > .el-tabs__header .el-tabs__nav {
+    border: none;
+  }
+  .el-tabs__nav-wrap {
+    margin-bottom: -2px;
+  }
+}
+.query-table {
+  .move-line {
+    position: absolute;
+    top: -2px;
+    width: 100%;
+    height: 5px;
+    cursor: n-resize;
+  }
+}
+.tw-dialog-title {
+  padding: 5px 5px 5px 20px;
+  border-bottom: 1px solid #cccccc;
+  position: relative;
+  div {
+    font-size: 16px;
+    line-height: 16px;
+    color: #3c96f0;
+    font-weight: bold;
+    &::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 4px;
+
+      background: #3c96f0;
+    }
+  }
+}
+.tw-map-tool {
+  border-radius: 8px;
+  transition: all 0.5s;
+  z-index: 50;
+  &.show-tool {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    + .tw-map-tool {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+  }
+}
+.tab-info {
+  .el-tabs__item {
+    padding: 0 15px;
+  }
+}
+// 分割线
+.tw-driver {
+  // 垂直分割线
+  &.vertical {
+    background-color: #dcdfe6;
+    display: inline-block;
+    width: 1px;
+    height: 1em;
+    margin: 0 8px;
+    vertical-align: middle;
+    position: relative;
+  }
+}
+// 特定区域监控，列表
+.danger-list {
+  color: red;
+}
+.el-table .danger-row {
+  color: red;
+}
+.tw-template-height {
+  height: 100%;
+  .el-tabs__content {
+    height: calc(100% - 56px);
+    .el-tab-pane {
+      height: 100%;
+    }
+  }
+}
+@mixin scrollbar() {
+  width: 0px;
+  height: 10px;
+}
+@mixin scrollbar-thumb() {
+  background-color: #0e5997;
+  border-radius: 3px;
+}
+
+.tw-map-left-panel {
+  ::-webkit-scrollbar {
+    @include scrollbar();
+  }
+  //滚动条的滑块
+  ::-moz-scrollbar-thumb {
+    @include scrollbar-thumb();
+  }
+  ::-moz-scrollbar {
+    @include scrollbar();
+  }
+  //滚动条的滑块
+  ::-webkit-scrollbar-thumb {
+    @include scrollbar-thumb();
+  }
+  ::-m-scrollbar {
+    @include scrollbar();
+  }
+  //滚动条的滑块
+  ::-m-scrollbar-thumb {
+    @include scrollbar-thumb();
+  }
+}
+
+.cls-1 {
+  fill: #c3d2f5;
+  stroke: #95acea;
+  stroke-miterlimit: 10;
+}
+
+// svg:hover {
+//   fill: green;
+//   stroke: #95acea;
+//   stroke-miterlimit: 10;
+// }
+
+.tw-query-table {
+  .important-row {
+    background: #f0f9eb;
+  }
+}
+// 乘客流向分析
+.tw-map-tool {
+  .el-tabs--card > .el-tabs__header .el-tabs__item.is-active {
+    border-bottom: 1px solid transparent;
+  }
+  .el-tabs__header {
+    background-color: #ffffff;
+  }
+}
+.tw-query-panel.dialog_no + .el-dialog__wrapper {
+  overflow: hidden;
+  .el-dialog.dialog-big.big {
+    margin-top: 50px !important;
+    .el-dialog__body {
+      padding: 0;
+    }
+  }
+}

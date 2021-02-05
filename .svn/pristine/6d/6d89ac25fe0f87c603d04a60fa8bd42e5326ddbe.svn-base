@@ -1,0 +1,405 @@
+<!--综合订单查询-->
+<template>
+  <div class="tw-template-wrapper">
+    <el-form class="tw-query-bar" :model="query" :inline="true" size="small" ref="queryBar">
+      <el-form-item>
+        <el-select v-model="query.ptname" clearable placeholder="平台名称">
+          <el-option
+            v-for="item in getAutoCompanyName"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          ></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-select v-model="query.key" clearable>
+          <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"> </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item>
+        <el-autocomplete
+          class="inline-input"
+          v-model="query.value"
+          :fetch-suggestions="handleQuerySearch"
+          placeholder="车牌号码"
+          :trigger-on-focus="false"
+          @focus="handleCarfocus"
+          clearable
+        ></el-autocomplete>
+      </el-form-item>
+      <el-form-item>
+        <el-date-picker v-model="query.stime" type="datetime" placeholder="开始日期"></el-date-picker>
+      </el-form-item>
+      <el-form-item>
+        <el-date-picker v-model="query.etime" type="datetime" placeholder="结束日期"></el-date-picker>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleQueryClick">查询</el-button>
+      </el-form-item>
+    </el-form>
+    <div class="tw-query-panel" ref="queryPanel">
+      <el-table
+        class="tw-table"
+        :data="table.data"
+        v-loading="tableLoading"
+        border
+        size="small"
+        height="calc(100% - 352px)"
+        @row-dblclick="handleConpanyNameRowClick"
+      >
+        <el-table-column type="index" label="序号"></el-table-column>
+        <el-table-column prop="COMPANYNAME" label="平台名称"></el-table-column>
+        <el-table-column prop="ADDRESS" label="行政区划"></el-table-column>
+        <el-table-column prop="ORDERID" label="订单编号"></el-table-column>
+        <el-table-column prop="LICENSEID" label="机动车驾驶证编号"></el-table-column>
+        <el-table-column prop="DRIVERPHONE" label="驾驶员手机号"></el-table-column>
+        <el-table-column prop="VEHICLENO" label="车辆号牌"></el-table-column>
+        <el-table-column
+          prop="DISTRIBUTETIME"
+          label="派单时间"
+          :formatter="timeFormatter"
+          :resizable="false"
+        ></el-table-column>
+      </el-table>
+      <el-pagination
+        class="tw-page-bar"
+        background
+        :page-size="table.pageSize"
+        :current-page="table.currentPage"
+        :total="table.total"
+        @current-change="handleTablePageCurrentChange"
+      ></el-pagination>
+      <el-tabs v-model="activeTableName" class="tw-tab-info" @tab-click="tabsClick">
+        <el-tab-pane label="经营出发" name="third">
+          <el-table class="tw-table" :data="table3Data" v-loading="table3Loading" border size="small" height="250">
+            <el-table-column prop="ABB_NAME" label="平台名称"></el-table-column>
+            <el-table-column prop="ORDERID" label="订单号"></el-table-column>
+            <el-table-column prop="LICENSEID" label="机动车驾驶证号"></el-table-column>
+            <el-table-column prop="VEHICLENO" label="车牌号码"></el-table-column>
+            <el-table-column prop="DEPTIME" label="上车时间" :formatter="time2Formatter"></el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="经营到达" name="fourth">
+          <el-table class="tw-table" :data="table4Data" v-loading="table4Loading" border size="small" height="250">
+            <el-table-column prop="ABB_NAME" label="平台名称"></el-table-column>
+            <el-table-column prop="ORDERID" label="订单号"></el-table-column>
+            <el-table-column prop="DESTTIME" label="下车时间" :formatter="time2Formatter"></el-table-column>
+            <el-table-column prop="DRIVEMILE" label="载客里程"></el-table-column>
+            <el-table-column prop="DRIVETIME" label="载客时间"></el-table-column>
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="支付信息" name="first">
+          <el-table class="tw-table" :data="table1.data" v-loading="table1Loading" border size="small" height="250">
+            <el-table-column prop="COMPANYNAME" label="平台名称" width="160"></el-table-column>
+            <el-table-column prop="ORDERID" label="订单号" width="160"></el-table-column>
+            <el-table-column prop="ONAREA" label="上车位置行政区划编号" width="220"></el-table-column>
+            <el-table-column prop="DRIVERNAME" label="机动车驾驶员姓名" width="150"></el-table-column>
+            <el-table-column prop="LICENSEID" label="机动车驾驶证号" width="150"></el-table-column>
+            <el-table-column prop="FARETYPE" label="运价类型编码" width="160"></el-table-column>
+            <el-table-column prop="VEHICLENO" label="车辆号牌" width="160"></el-table-column>
+            <el-table-column prop="WAITTIME" label="等待时间" width="120"></el-table-column>
+            <el-table-column
+              prop="BOOKDEPTIME"
+              label="预计上车时间"
+              :formatter="timeFormatter"
+              width="150"
+            ></el-table-column>
+            <!-- <el-table-column prop="DEPLONGITUDE" label="车辆出发经度" width="160"></el-table-column> -->
+            <!-- <el-table-column prop="DEPLATITUDE" label="车辆出发纬度" width="160"></el-table-column> -->
+            <el-table-column prop="DEPAREA" label="上车地点" width="220"></el-table-column>
+            <el-table-column prop="DEPTIME" label="上车时间" :formatter="timeFormatter" width="150"></el-table-column>
+            <!-- <el-table-column prop="DESTLONGITUDE" label="车辆到达经度" width="160"></el-table-column> -->
+            <!-- <el-table-column prop="DESTLATITUDE" label="车辆到达纬度" width="160"></el-table-column> -->
+            <el-table-column prop="DESTAREA" label="下车地点" width="220"></el-table-column>
+            <el-table-column prop="DESTTIME" label="下车时间" :formatter="timeFormatter" width="150"></el-table-column>
+            <el-table-column prop="BOOKMODEL" label="预定车型" width="160"></el-table-column>
+            <el-table-column prop="MODEL" label="实际使用车型" width="160"></el-table-column>
+            <el-table-column prop="DRIVEMILE" label="载客里程" width="220"></el-table-column>
+            <el-table-column prop="DRIVETIME" label="载客时间" width="120"></el-table-column>
+            <el-table-column prop="WAITMILE" label="空驶里程" width="150"></el-table-column>
+            <el-table-column prop="FACTPRICE" label="实收金额(元)" width="160"></el-table-column>
+            <el-table-column prop="PRICE" label="应收金额" width="160"></el-table-column>
+            <!-- <el-table-column prop="CASHPRICE" label="现金支付金额" width="120"></el-table-column> -->
+            <!-- <el-table-column prop="LINENAME" label="电子支付机构" width="150"></el-table-column> -->
+            <!-- <el-table-column prop="LINEPRICE" label="电子支付金额" width="160"></el-table-column> -->
+            <!-- <el-table-column prop="POSNAME" label="POS机支付机构" width="160"></el-table-column> -->
+            <!-- <el-table-column prop="POSPRICE" label="POS机支付金额" width="220"></el-table-column> -->
+            <!-- <el-table-column prop="BENFITPRICE" label="优惠金额" width="120"></el-table-column> -->
+            <!-- <el-table-column prop="BOOKTIP" label="预约服务费" width="150"></el-table-column> -->
+            <!-- <el-table-column prop="PASSENGERTIP" label="附加费" width="160"></el-table-column> -->
+            <!-- <el-table-column prop="PEAKUPPRICE" label="高峰时段时间加价金额" width="200"></el-table-column> -->
+            <!-- <el-table-column prop="NIGHTUPPRICE" label="夜间时段里程加价金额" width="200"></el-table-column> -->
+            <!-- <el-table-column prop="FARUPPRICE" label="远途加价金额" width="150"></el-table-column> -->
+            <!-- <el-table-column prop="OTHERUPPRICE" label="其他加价金额" width="160"></el-table-column> -->
+            <!-- <el-table-column prop="PAYSTATE" label="结算状态" width="220"></el-table-column> -->
+            <el-table-column
+              prop="ORDERMATCHTIME"
+              label="订单完成时间"
+              :formatter="timeFormatter"
+              width="150"
+            ></el-table-column>
+            <el-table-column
+              prop="PAYTIME"
+              label="乘客结算时间"
+              :formatter="timeFormatter"
+              width="150"
+            ></el-table-column>
+            <!-- <el-table-column prop="INVOICESTATUS" label="发票状态" min-width="120" :resizable="false"></el-table-column> -->
+          </el-table>
+        </el-tab-pane>
+        <el-tab-pane label="投诉信息" name="second">
+          <el-table class="tw-table" :data="table2Data" v-loading="table2Loading" border size="small" height="250">
+            <el-table-column prop="COMPANYNAME" label="平台名称"></el-table-column>
+            <el-table-column prop="ORDERID" label="订单号"></el-table-column>
+            <el-table-column prop="COMPLAINTTIME" label="投诉时间" :formatter="time2Formatter"></el-table-column>
+            <el-table-column prop="DETAIL" label="投诉原因"></el-table-column>
+          </el-table>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+import _ from 'underscore'
+import { mapGetters } from 'vuex'
+import moment from 'moment'
+import { templateHeight } from '../../assets/js/util'
+
+export default {
+  name: 'ComprehensiveOrderQuery',
+  data() {
+    return {
+      activeTableName: 'first',
+      query: {
+        ptname: '0',
+        key: '',
+        value: '',
+        stime: '',
+        etime: ''
+      },
+      options: [
+        {
+          value: '驾驶证号',
+          label: '驾驶证号'
+        },
+        {
+          value: '车牌号码',
+          label: '车牌号码'
+        },
+        {
+          value: '驾驶员电话',
+          label: '驾驶员电话'
+        },
+        {
+          value: '订单编号',
+          label: '订单编号'
+        }
+      ],
+      value: '',
+      table: {
+        data: [],
+        loading: false,
+        pageSize: 20,
+        currentPage: 1,
+        total: 0
+      },
+      table1: {
+        data: []
+      },
+      tableLoading: false,
+      table1Loading: false,
+      table2Loading: false,
+      table2Data: [],
+      table3Loading: false,
+      table3Data: [],
+      table4Loading: false,
+      table4Data: [],
+      nowRow: {},
+      isChanged: false,
+      changeCount: 0
+    }
+  },
+  computed: {
+    ...mapGetters(['getAutoCompanyName'])
+  },
+  mounted() {
+    this.$nextTick(() => {
+      const elements = this.$refs['queryBar'].$el
+      templateHeight(this.$refs['queryPanel'], elements)
+      this.query.stime = moment(moment().format('YYYY-MM-DD 00:00:00'))
+      this.query.etime = moment(moment().format('YYYY-MM-DD HH:mm:ss'))
+      this.getDataList()
+    })
+  },
+  methods: {
+    //标签页点击
+    tabsClick(tab, event) {
+      this.activeTableName = tab.name
+      //优化查询 避免重复查询
+      if (this.nowRow.ORDERID && !(this.changeCount == 1) && this.isChanged) {
+        this.changeCount += 1
+        this.getDCompanyList(this.nowRow)
+      }
+    },
+    //表格行事件
+    handleConpanyNameRowClick(row) {
+      this.nowRow = row
+      this.getDCompanyList(row)
+    },
+    getDataList() {
+      const { ptname, key, value, stime, etime } = this.query
+      const { currentPage, pageSize } = this.table
+      const baseURL = this.baseURL
+      if (!stime || stime == '' || etime == '' || !etime) {
+        this.$message({
+          message: '时间选项不能为空!!',
+          type: 'warning'
+        })
+      } else {
+        this.tableLoading = true
+        const postData =
+          'postData=' +
+          JSON.stringify({
+            ptname,
+            key,
+            value,
+            begintime: moment(stime).format('YYYY-MM-DD HH:mm:ss'),
+            endtime: moment(etime).format('YYYY-MM-DD HH:mm:ss'),
+            pageIndex: currentPage,
+            pageSize
+          })
+        axios.post('manage/findDdxx', postData, { baseURL }).then(res => {
+          try {
+            let mydata = res.data.datas
+            let data = res.data
+            this.table.data = mydata.slice(mydata.length - 20, mydata.length)
+            this.table.total = parseInt(data.count)
+            this.tableLoading = false
+          } catch (e) {}
+        })
+      }
+    },
+    getDCompanyList(item) {
+      if (this.activeTableName == 'first') {
+        this.table1Loading = true
+        const baseURL = this.baseURL
+        const postData =
+          `postData=` +
+          JSON.stringify({
+            distributetime: moment(item.DISTRIBUTETIME).format('YYYY-MM-DD HH:mm:ss'),
+            orderid: item.ORDERID
+          })
+        axios.post('manage/findPay', postData, { baseURL }).then(res => {
+          try {
+            let data = res.data
+            this.table1.data = data.datas
+            setTimeout(() => {
+              this.table1Loading = false
+            }, 500)
+          } catch (e) {}
+        })
+      } else if (this.activeTableName == 'second') {
+        this.table2Loading = true
+        const baseURL = this.baseURL
+        const postData =
+          `postData=` +
+          JSON.stringify({
+            orderid: item.ORDERID,
+            distributetime: moment(item.DISTRIBUTETIME).format('YYYY-MM-DD HH:mm:ss')
+          })
+        axios.post('manage/findComplaint', postData, { baseURL }).then(res => {
+          try {
+            let data = res.data
+            this.table2Data = data.datas
+            setTimeout(() => {
+              this.table2Loading = false
+            }, 500)
+          } catch (e) {}
+        })
+      } else if (this.activeTableName == 'third') {
+        this.table3Loading = true
+        const params = new URLSearchParams()
+        params.append('time', moment(item.DISTRIBUTETIME).format('YYYY-MM-DD HH:mm:ss'))
+        params.append('orderid', item.ORDERID)
+        return axios.post('map/businessStart', params, { baseURL: this.baseURL }).then(res => {
+          this.table3Data = res.data
+          setTimeout(() => {
+            this.table3Loading = false
+          }, 500)
+        })
+      } else if (this.activeTableName == 'fourth') {
+        this.table4Loading = true
+        const params = new URLSearchParams()
+        params.append('time', moment(item.DISTRIBUTETIME).format('YYYY-MM-DD HH:mm:ss'))
+        params.append('orderid', item.ORDERID)
+        return axios.post('map/businessArrival', params, { baseURL: this.baseURL }).then(res => {
+          this.table4Data = res.data
+          setTimeout(() => {
+            this.table4Loading = false
+          }, 500)
+        })
+      }
+    },
+    //查询事件
+    handleQueryClick() {
+      this.table.currentPage = 1
+      this.getDataList()
+      this.table1.data = []
+      this.table2Data = []
+      this.table3Data = []
+      this.table4Data = []
+    },
+    //时间转换
+    timeFormatter(item, col, value) {
+      return moment(value).format('YYYY-MM-DD HH:mm:ss')
+    },
+    time2Formatter(item, col, value) {
+      return moment(value).format('YYYY-MM-DD HH:mm:ss')
+    },
+    //分页
+    handleTablePageCurrentChange(index) {
+      this.table.currentPage = index
+      this.getDataList()
+    },
+    //车牌号码输入框输入后匹配信息
+    handleQuerySearch(query, cb) {
+      if (query.length >= 5) {
+        let idata = `postData={'vehino':'${query}'}`
+        axios
+          .post('manage/findJcVehicleNo', idata, {
+            baseURL: this.baseURL
+          })
+          .then(({ data }) => {
+            for (let i = 0; i < data.vehicleNo.length; i++) {
+              data.vehicleNo[i].value = data.vehicleNo[i].VEHICLENO
+            }
+            cb(data.vehicleNo)
+          })
+      } else {
+        return
+      }
+    },
+    //车牌号码输入框聚焦事件
+    handleCarfocus() {
+      const { vehino } = this.query
+      if (vehino === '') this.query.vehino = '浙A'
+    },
+    ifRowChange() {
+      this.changeCount = 0
+      this.isChanged = true
+    }
+  },
+  watch: {
+    nowRow: 'ifRowChange'
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.tw-query-panel {
+  height: calc(100% - 100px);
+}
+</style>

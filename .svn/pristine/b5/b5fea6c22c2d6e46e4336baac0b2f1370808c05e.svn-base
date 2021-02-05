@@ -1,0 +1,45 @@
+{
+  "data": [
+    {
+      "msg": 0,
+      "datas": [
+        { "DATAFLOW": 126876, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "腾飞出行", "COMPANYID": "tfcx" },
+        { "DATAFLOW": 221525, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "及时用车", "COMPANYID": "jishi" },
+        { "DATAFLOW": 1008373, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "享道出行", "COMPANYID": "xiangdao" },
+        { "DATAFLOW": 253031, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "妥妥E行", "COMPANYID": "tuotuo" },
+        { "DATAFLOW": 372747, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "网路出行", "COMPANYID": "wanglu" },
+        { "DATAFLOW": 128096, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "添猫出行", "COMPANYID": "tmcx" },
+        { "DATAFLOW": 105774, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "众车出行", "COMPANYID": "zhongche" },
+        { "DATAFLOW": 1208332, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "首汽约车", "COMPANYID": "shouyue" },
+        { "DATAFLOW": 2037618, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "曹操出行", "COMPANYID": "caocao" },
+        { "DATAFLOW": 331803, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "多彩出行", "COMPANYID": "dccx" },
+        { "DATAFLOW": 556853, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "耀出行", "COMPANYID": "weixing" },
+        { "DATAFLOW": 194072, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "携华出行", "COMPANYID": "xiehua" },
+        { "DATAFLOW": 313823, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "神州专车", "COMPANYID": "shenzhou" },
+        { "DATAFLOW": 4636831, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "万顺叫车", "COMPANYID": "wanshun" },
+        { "DATAFLOW": 568819, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "T3出行", "COMPANYID": "T3" },
+        { "DATAFLOW": 290853, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "AA出行", "COMPANYID": "aa" },
+        { "DATAFLOW": 8214642, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "滴滴出行", "COMPANYID": "didi" },
+        { "DATAFLOW": 1741, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "去哪儿专车", "COMPANYID": "TJHT" },
+        { "DATAFLOW": 838020, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "吉刻上车", "COMPANYID": "jike" },
+        { "DATAFLOW": 24, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "久柏易游", "COMPANYID": "jbyy" },
+        { "DATAFLOW": 154630, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "逸乘出行", "COMPANYID": "yicheng" },
+        { "DATAFLOW": 504601, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "雷利出行", "COMPANYID": "leili" },
+        { "DATAFLOW": 7666973, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "花小猪", "COMPANYID": "didihxz" },
+        { "DATAFLOW": 456704, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "旅程约车", "COMPANYID": "lvcheng" },
+        { "DATAFLOW": 22296, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "福瑞出行", "COMPANYID": "oula" },
+        { "DATAFLOW": 89828, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "捎点宝", "COMPANYID": "shaodianbao" },
+        { "DATAFLOW": 944934, "FLAG": "1", "DBTIME": 1604037600000, "ABB_NAME": "恒好打车", "COMPANYID": "hhyc" },
+        {
+          "DATAFLOW": 36009,
+          "FLAG": "1",
+          "DBTIME": 1604037600000,
+          "ABB_NAME": "阳光出行",
+          "COMPANYID": "yangguangchedao"
+        },
+        { "DATAFLOW": 0, "FLAG": "0", "DBTIME": "", "ABB_NAME": "博约出行", "COMPANYID": "" },
+        { "DATAFLOW": 0, "FLAG": "0", "DBTIME": "", "ABB_NAME": "来了出行", "COMPANYID": "" }
+      ]
+    }
+  ]
+}

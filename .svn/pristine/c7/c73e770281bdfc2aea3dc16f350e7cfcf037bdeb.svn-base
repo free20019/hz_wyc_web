@@ -1,0 +1,47 @@
+$margin: 10px;
+// system menu border color
+$tw-menu-bColor: #174880;
+// system menu item font size
+$tw-menu-fontSize: 18px;
+// system menu font color
+$tw-menu-color_default: #ffffff;
+// system menu default background color
+$tw-menu-bgColor: #0c2039;
+// system menu active background color
+$tw-menu-bgColor_action: #081a2c;
+// total menu width
+$tw-menu-totalWidth: 50px;
+// total menu active width
+$tw-menu-totalWidth_active: 300px;
+// total menu item height
+$tw-menu-totalItemHeight: 50px;
+// total menu item font color
+$tw-menu-totalItemColor: #16477f;
+// menu item height
+$tw-menu-itemHeight: 40px;
+// menu default font size
+$tw-menu-fontSize_default: 18px;
+// menu item border color
+$tw-menu-itemBColor: #0ebafa;
+// menu item active font color
+$tw-menu-itemColor_active: #ffffff;
+// menu item active background color
+$tw-menu-itemBgColor_active: #0a5380;
+// menu open panel font color
+$tw-menu-openColor: #ffffff;
+// menu panel background color
+$tw-menu-panelBgColor: #08192b;
+// menu panel background color
+$tw-menu-panelShadowColor: #000000;
+// menu font color
+$tw-menu-secondaryColor: #ffffff;
+// menu strip font color
+$tw-menu-stripColor: #dfe2e2;
+// menu header font size
+$tw-menu-header-fontSize: 28px;
+// total menu total default font color
+$tw-menu-total-color_default: #000000;
+// total menu total font color
+$tw-menu-total-fontSize: 12px;
+// total menu total default font color
+$tw-menu-total-fontSize_default: 14px;

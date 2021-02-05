@@ -1,0 +1,29 @@
+{
+  "data": [
+    {
+      "datas": [
+        {
+          "COUNT": 2590,
+          "LASTTIME": "超过一年未营运"
+        },
+        {
+          "COUNT": 3342,
+          "LASTTIME": "超过一个月未营运"
+        },
+        {
+          "COUNT": 2990,
+          "LASTTIME": "超过三个月未营运"
+        },
+        {
+          "COUNT": 14181,
+          "LASTTIME": "未参加营运"
+        },
+        {
+          "COUNT": 5629,
+          "LASTTIME": "超过六个月未营运"
+        }
+      ],
+      "count": "77987"
+    }
+  ]
+}

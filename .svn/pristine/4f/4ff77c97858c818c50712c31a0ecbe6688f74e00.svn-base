@@ -1,0 +1,140 @@
+<!-- 执法查询 -->
+<template>
+  <div class="tw-template-wrapper">
+    <el-form class="tw-query-bar" :inline="true" :model="query" size="small" ref="queryBar">
+      <el-form-item label="公司名称：">
+        <el-input v-model="query.companyName" clearable placeholder="公司名称"></el-input>
+      </el-form-item>
+      <el-form-item label="开始时间：">
+        <el-date-picker v-model="query.stime" type="date" placeholder="开始时间"> </el-date-picker>
+      </el-form-item>
+      <el-form-item label="结束时间：">
+        <el-date-picker v-model="query.etime" type="date" placeholder="结束时间"> </el-date-picker>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="getData()">查询</el-button>
+      </el-form-item>
+       <el-form-item>
+        <el-button type="primary" @click="handleQueryDC()">导出</el-button>
+      </el-form-item>
+    </el-form>
+    <div class="tw-query-panel" ref="queryPanel">
+      <el-table
+        :data="filterTableList"
+        class="tw-table"
+        v-loading="table.loading"
+        stripe
+        border
+        height="calc(100% - 42px)"
+      >
+        <el-table-column align="center" type="index" label="序号" width="60"></el-table-column>
+        <el-table-column align="center" prop="PERSON" label="执法对象" width="140"></el-table-column>
+        <el-table-column align="center" prop="SFZH" label="身份证号" width="180"></el-table-column>
+        <el-table-column align="center" prop="CPHM" label="车牌号码" width="140"></el-table-column>
+        <el-table-column align="center" prop="COMPANY" label="所属公司" width="240"></el-table-column>
+        <el-table-column align="center" prop="TITLE" label="执法主题" width="200"></el-table-column>
+        <el-table-column align="center" prop="CONTENT" label="执法事件" width="400"></el-table-column>
+        <el-table-column align="center" label="操作" min-width="140" :resizable="false">
+          <template slot-scope="scope">
+            <el-button @click="handleClick(scope.row)">查看图片</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        background
+        :page-size="table.pageSize"
+        :current-page="table.currentPage"
+        :total="table.total"
+        @current-change="handleTablePageCurrentChange"
+      ></el-pagination>
+    </div>
+    <el-dialog title="查看图片" :visible.sync="dialog.display">
+      <img v-for="(item, index) in table.selectRow.pucture" :key="index" :src="item.ZF_ZP" max-width="100%" />
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import { templateHeight, filterTablePage } from '../../assets/js/util'
+import { ajaxT } from '../../assets/js/api'
+import moment from 'moment'
+
+export default {
+  name: 'LawEnforcementDispatch',
+  data() {
+    return {
+      query: {
+        companyName: '',
+        stime: '',
+        etime: ''
+      },
+      table: {
+        data: [],
+        loading: false,
+        pageSize: 25,
+        total: 0,
+        currentPage: 1,
+        selectRow: {}
+      },
+      dialog: {
+        display: false
+      }
+    }
+  },
+  computed: {
+    filterTableList() {
+      return filterTablePage(this.table)
+    }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      const elements = this.$refs['queryBar'].$el
+      templateHeight(this.$refs['queryPanel'], elements)
+      this.getData()
+    })
+  },
+  methods: {
+    // 表格查看图片点击事件
+    handleClick(row) {
+      this.table.selectRow = row
+      this.dialog.display = true
+    },
+    // 查询按钮点击事件
+    handelQueryClick() {
+      this.getData()
+    },
+    // 查询API
+    getData() {
+      this.table.loading = true
+      const { companyName, stime, etime } = this.query
+      ajaxT
+        .get('map/getZFCX', {
+          params: {
+            company: companyName,
+            stime: stime && moment(stime).format('YYYY-MM-DD HH::mm:ss'),
+            etime: etime && moment(etime).format('YYYY-MM-DD HH::mm:ss')
+          }
+        })
+        .then(res => {
+          this.table.total = res.data.length
+          this.table.data = res.data
+          this.table.loading = false
+        })
+    },
+    handleQueryDC() {
+      const { companyName, stime, etime } = this.query
+      let url = `${this.baseURL}map/getZFCXexcle?company=${companyName}&time=${stime && moment(stime).format('YYYY-MM-DD HH::mm:ss')}&etime=${etime && moment(etime).format('YYYY-MM-DD HH::mm:ss')}`
+      window.open(url)
+    },
+    handleTablePageCurrentChange(index) {
+      this.table.currentPage = index
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+img {
+  max-width: 100%;
+}
+</style>

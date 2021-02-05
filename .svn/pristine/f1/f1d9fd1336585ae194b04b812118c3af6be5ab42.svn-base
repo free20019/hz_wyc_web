@@ -1,0 +1,507 @@
+<!--特定区域监测-->
+<template>
+  <div class="tw-template-wrapper">
+    <div class="tw-map-left-panel" v-show="mapQueryPanel">
+      <el-tabs v-model="tabs.active" type="card" :stretch="true" v-loading="tabs.display">
+        <el-tab-pane label="在线无证车辆" name="clxqlb">
+          <div class="tab-info">
+            <el-table :data="areaList" :row-class-name="tableRowClassName" @row-click="handleSearchForClick">
+              <el-table-column :show-overflow-tooltip="true" prop="NAME" width="100" label="区域"></el-table-column>
+              <el-table-column align="center" prop="NUM" label="车辆数"></el-table-column>
+            </el-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="无证车辆列表" name="vhiclist">
+          <div class="tab-info">
+            <el-table :data="tabs.data" style="width: 100%;height: 800px; overflow: auto;" @row-click="vehilistClick">
+              <el-table-column prop="vehName" label="平台名称" width="180"> </el-table-column>
+              <el-table-column prop="vehino" label="车牌号码" width="180"> </el-table-column>
+            </el-table>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
+    <div class="map-box" id="arcgisMap"></div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+import _ from 'underscore'
+import moment from 'moment'
+import { esriLoaders, mapLayerPath } from '../../assets/js/arcgis.comfig'
+import { iconClassName } from '../../assets/js/util'
+import $ from 'jquery'
+
+export default {
+  name: 'SpecificAreaMonitor',
+  data() {
+    return {
+      tabs: {
+        active: 'clxqlb',
+        display: false,
+        data: [],
+        areajwd: ''
+      },
+      map: {
+        arcgisMap: null,
+        levelMap: null,
+        dialog: null,
+        marMap: null
+      },
+      loading: false,
+      mapQueryPanel: false,
+      fanceQueryPanel: false,
+      activeAreaNames: 0,
+      areaList: [],
+      vehicleList: [],
+      table: {
+        data: []
+      },
+      currentPage: 1,
+      tableRows: 10,
+      total: 0,
+      totalPages: 1,
+      fanceLonding: false,
+      areaLonding: false,
+      areaname: '区域名称',
+      tabactiveName: 'first',
+      colors: [
+        [51, 102, 204, 0.3],
+        [220, 57, 18, 0.3],
+        [255, 153, 0, 0.3],
+        [16, 150, 24, 0.3],
+        [153, 0, 153, 0.3],
+        [0, 153, 198, 0.3],
+        [221, 68, 119, 0.3],
+        [102, 170, 0, 0.3],
+        [184, 46, 46, 0.3],
+        [49, 99, 149, 0.3],
+        [153, 68, 153, 0.3],
+        [34, 170, 153, 0.3],
+        [170, 170, 17, 0.3],
+        [102, 51, 204, 0.3],
+        [230, 115, 0, 0.3],
+        [139, 7, 7, 0.3],
+        [101, 16, 103, 0.3],
+        [50, 146, 98, 0.3],
+        [85, 116, 166, 0.3],
+        [59, 62, 172, 0.3]
+      ]
+    }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      let _this = this
+      this.mapQueryPanel = true
+      try {
+        esriLoaders([
+          'esri/map',
+          'esri/basemaps',
+          'esri/layers/GraphicsLayer',
+          'esri/lang',
+          'dijit/TooltipDialog',
+          'dijit/popup',
+          'dojo/dom-style'
+        ]).then(([Map, basemaps, GraphicsLayer, esriLang, TooltipDialog, dijitPopup, domStyle]) => {
+          basemaps.mapLayerPath = mapLayerPath
+          this.map.arcgisMap = new Map('arcgisMap', {
+            basemap: 'mapLayerPath',
+            spatialReference: {
+              wkid: 4326
+            },
+            center: [120.197521, 30.24298],
+            zoom: 3
+          })
+          _this.map.arcgisMap.infoWindow.resize(245, 125)
+          _this.map.dialog = new TooltipDialog({
+            style: 'position: absolute; width: 350px; font: normal normal normal 10pt Helvetica;z-index:100'
+          })
+          _this.map.dialog.startup()
+          this.map.arcgisMap.on('load', () => {
+            this.map.levelMap = new GraphicsLayer({
+              id: 'levelmap'
+            })
+            this.map.arcgisMap.addLayer(this.map.levelMap)
+            this.map.marMap = new GraphicsLayer({
+              id: 'marMap'
+            })
+            this.map.arcgisMap.addLayer(this.map.marMap)
+            this.getareajwd()
+            _this.map.marMap.on('click', evt => {
+              $('.mapDialog').hide()
+              dijitPopup.close(_this.map.dialog)
+              let result = evt.graphic.attributes
+              // let golsgj = $('<span class="">轨迹</span>').addClass('bottomRight golsgj').on('click', () => {
+              // 	this.test(result)
+              // });
+              let t =
+                '<div class="mapDialog" style="">' +
+                '<div class="mapToolPanel">' +
+                '<TitleCircle><HyperCircle></HyperCircle>网约车-' +
+                result.vehino +
+                '<HyperCircle></HyperCircle><i class="iconfont icon-close"></i></TitleCircle>' +
+                '<div class="conent" style="padding-top: 20px;">' +
+                '<div class="rowbox clearfix">' +
+                '<div class="normBox" type="left" style="display: inline-block;">' +
+                '<div class="normTitle">速度</div>' +
+                '<div class="normInfo sbig">' +
+                '<span class="intensify">' +
+                result.speed +
+                '</span>KM/H' +
+                '</div>' +
+                '</div>' +
+                '<div class="normBox" type="right" style="display: inline-block;">' +
+                '<div class="normTitle">营运状态</div>' +
+                '<div class="normInfo sbig" style="font-size: 18px">' +
+                _this.fomarttype1(result.bizStatus) +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '<div class="normBox" type="left">' +
+                '<div class="normTitle">GPS时间</div>' +
+                '<div class="normInfo sbig">' +
+                _this.fomarttime(result.dateTime) +
+                '</div>' +
+                '</div>' +
+                '<div class="normBox" type="left">' +
+                '<div class="normTitle">所属公司</div>' +
+                '<div class="normInfo sbig">' +
+                result.vehName +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>'
+              let content = esriLang.substitute(evt.graphic.attributes, t)
+              _this.map.dialog.setContent(content)
+              domStyle.set(_this.map.dialog.domNode, 'opacity', 0.85)
+              dijitPopup.open({
+                popup: _this.map.dialog,
+                x: evt.pageX,
+                y: evt.pageY
+              })
+              $('.icon-close').click(function() {
+                $('.mapDialog').hide()
+                dijitPopup.close(_this.map.dialog)
+              })
+            })
+          })
+        })
+      } catch (e) {}
+    })
+  },
+  computed: {
+    tableColumn() {
+      return [
+        { prop: 'ABB_NAME', label: '平台名称', width: 80 },
+        { prop: 'VEHICLENO', label: '车牌号码', width: 90 },
+        {
+          prop: 'IN_OUT',
+          label: '类型',
+          width: 50,
+          'show-overflow-tooltip': true,
+          formatter: this.fomarttype
+        },
+        {
+          prop: 'POSITIONTIME',
+          label: '定位时间',
+          'min-width': 160,
+          'show-overflow-tooltip': true,
+          resizable: false,
+          formatter: this.fomarttime
+        }
+      ]
+    },
+    filterDataList() {
+      return _.filter(this.fanceData, (item, index) => {
+        return (this.currentPage - 1) * this.tableRows <= index && this.currentPage * this.tableRows > index
+      })
+    }
+  },
+  methods: {
+    iconClassName,
+    handleSearchForClick(row) {
+      this.tabs.areajwd = row.CORE
+      this.getVehiList(row.ID)
+    },
+    tableRowClassName({ row, rowIndex }) {
+      if (row.AREA_NUM > row.AREA_AVG_NUM) {
+        return 'danger-row'
+      } else return ''
+    },
+    fomarttype(row, column, type) {
+      if (type == '0') return '进'
+      else if (type == '1') return '出'
+    },
+    fomarttype1(type) {
+      if (type == '1') return '载客'
+      else if (type == '2') return '接单'
+      else if (type == '3') return '空驶'
+      else if (type == '4') return '停运'
+    },
+    fomarttime(date) {
+      return moment(date).format('YYYY-MM-DD HH:mm:ss')
+    },
+    getareajwd() {
+      axios
+        .get('map/getareajwd', {
+          baseURL: this.baseURL
+        })
+        .then(res => {
+          this.areaList = res.data
+          _.each(res.data, (item, _index) => {
+            let polygonArr = new Array()
+            let zbs = item.JWD.split(';')
+            for (let i = 0; i < zbs.length; i++) {
+              let zb = zbs[i].split(',')
+              polygonArr.push([parseFloat(zb[0]) - 0.0049, parseFloat(zb[1]) + 0.0025])
+            }
+            this.addPolygon(item, polygonArr, this.colors[_index])
+          })
+        })
+    },
+    addPolygon(item, coordinate, color) {
+      esriLoaders([
+        'esri/graphic',
+        'esri/InfoTemplate',
+        'esri/geometry/Polygon',
+        'esri/symbols/SimpleFillSymbol',
+        'esri/symbols/SimpleLineSymbol',
+        'esri/Color'
+      ]).then(([Graphic, InfoTemplate, Polygon, SimpleFillSymbol, SimpleLineSymbol, Color]) => {
+        let infoTemplate6 = new InfoTemplate()
+        infoTemplate6.setTitle('区域名  ${NAME}')
+        infoTemplate6.setContent('区域描述： ${NAME}')
+
+        var polygonJson = {
+          rings: [coordinate],
+          spatialReference: {
+            wkid: 4326
+          }
+        }
+        var polygon = new Polygon(polygonJson)
+        this.map.levelMap.add(
+          new Graphic(
+            polygon,
+            new SimpleFillSymbol(
+              SimpleFillSymbol.STYLE_SOLID,
+              new SimpleLineSymbol(
+                SimpleLineSymbol.STYLE_SOLID,
+                new Color(color),
+                // new Color([42, 242, 255, 1]),
+                1
+              ),
+              new Color(color)
+            ),
+            item,
+            // infoTemplate6
+            ''
+          )
+        )
+      })
+    },
+    getVehiList(id) {
+      this.tabs.display = true
+      axios
+        .get('map/getGet', {
+          baseURL: this.baseURL,
+          params: {
+            areaid: id,
+            type: '2'
+          }
+        })
+        .then(res => {
+          this.map.marMap.clear()
+          this.tabs.display = false
+          this.tabs.active = 'vhiclist'
+          this.tabs.data = res.data
+          this.map.arcgisMap.centerAndZoom(
+            [
+              parseFloat(this.tabs.areajwd.split(',')[0]) - 0.0049,
+              parseFloat(this.tabs.areajwd.split(',')[1]) + 0.0025
+            ],
+            5
+          )
+          _.each(res.data, item => {
+            this.addmar(item)
+          })
+        })
+    },
+    addmar(item) {
+      esriLoaders(['esri/geometry/Point', 'esri/graphic', 'esri/symbols/PictureMarkerSymbol']).then(
+        ([Point, Graphic, PictureMarkerSymbol]) => {
+          let point = new Point({
+            x: item.longi - 0.0049,
+            y: item.lati + 0.0025,
+            spatialReference: {
+              wkid: 4326
+            }
+          })
+          let address = ''
+          if (item.mdt_no === 'didi') {
+            if (item.legal == '0') address = 'image/marker/ddh.png'
+            else address = 'image/marker/dd.png'
+          } else if (item.mdt_no === 'shenzhou') {
+            if (item.legal == '0') address = 'image/marker/szh.png'
+            else address = 'image/marker/sz.png'
+          } else if (item.mdt_no === 'caocao') {
+            if (item.legal == '0') address = 'image/marker/cch.png'
+            else address = 'image/marker/cc.png'
+          } else if (item.mdt_no === 'yidao') {
+            if (item.legal == '0') address = 'image/marker/ydh.png'
+            else address = 'image/marker/yd.png'
+          } else if (item.mdt_no === 'aa') {
+            if (item.legal == '0') address = 'image/marker/aah.png'
+            else address = 'image/marker/aa.png'
+          } else if (item.mdt_no === 'yangguangchedao') {
+            if (item.legal == '0') address = 'image/marker/ygh.png'
+            else address = 'image/marker/yg.png'
+          } else if (item.mdt_no === 'wanshun') {
+            if (item.legal == '0') address = 'image/marker/wsh.png'
+            else address = 'image/marker/ws.png'
+          } else if (item.mdt_no === 'shouyue') {
+            if (item.legal == '0') address = 'image/marker/syh.png'
+            else address = 'image/marker/sy.png'
+          } else if (item.mdt_no === 'TJHT') {
+            if (item.legal == '0') address = 'image/marker/xcych.png'
+            else address = 'image/marker/xcyc.png'
+          } else if (item.mdt_no === 'hhyc') {
+            if (item.legal == '0') address = 'image/marker/hhdch.png'
+            else address = 'image/marker/hhdc.png'
+          } else if (item.mdt_no === 'tongcheng') {
+            if (item.legal == '0') address = 'image/marker/mzdch.png'
+            else address = 'image/marker/mzdc.png'
+          } else if (item.mdt_no === 'dccx') {
+            if (item.legal == '0') address = 'image/marker/dccxh.png'
+            else address = 'image/marker/dccx.png'
+          } else if (item.mdt_no === 'xiehua') {
+            if (item.legal == '0') address = 'image/marker/xhcxh.png'
+            else address = 'image/marker/xhcx.png'
+          } else if (item.mdt_no === 'xiangdao') {
+            if (item.legal == '0') address = 'image/marker/xdcxh.png'
+            else address = 'image/marker/xdcx.png'
+          } else if (item.mdt_no === 'weixing') {
+            if (item.legal == '0') address = 'image/marker/ycxh.png'
+            else address = 'image/marker/ycx.png'
+          } else if (item.mdt_no === 'tmcx') {
+            if (item.legal == '0') address = 'image/marker/tmcxh.png'
+            else address = 'image/marker/tmcx.png'
+          }
+          let p = PictureMarkerSymbol(this.baseURL + address, 28, 38).setOffset(14, 19)
+          this.map.marMap.add(new Graphic(point, p, item, ''))
+        }
+      )
+    },
+    vehilistClick(row) {
+      this.map.marMap.clear()
+      this.addmar(row)
+      this.map.arcgisMap.centerAndZoom([parseFloat(row.longi) - 0.0049, parseFloat(row.lati) + 0.0025], 5)
+    },
+    /* 当页数改变时触发 */
+    handlePageSizeChange(page) {
+      this.currentPage = page
+    },
+    fomartyytype(row, column, type) {
+      if (type == '1') return '载客'
+      else if (type == '2') return '接单'
+      else if (type == '3') return '空驶'
+      else if (type == '4') return '停运'
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+$font-color: #374873;
+$border-color: #69a7f7;
+.tw-template-wrapper {
+  position: relative;
+}
+
+.tw-template-wrapper1 {
+  position: relative;
+  /*overflow: hidden;*/
+}
+
+.tw-collapse {
+  height: 100%;
+}
+
+.tw-map {
+  &-tool {
+    &-right {
+      top: 40px;
+      right: 0;
+    }
+  }
+}
+
+// 滑动面板 从下到上
+.mapQueryPanel--bottom {
+  &-enter-active,
+  &-leave-active {
+    transition: bottom 0.5s ease;
+  }
+  &-enter,
+  &-leave-to {
+    bottom: -450px;
+  }
+}
+.tab-info {
+  height: 100%;
+  padding: 0 5px;
+  overflow: auto;
+}
+.tw-icon-platform {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+.tw-map-left-panel {
+  position: absolute;
+  box-sizing: border-box;
+  height: 100%;
+  width: 300px;
+  padding: 10px 10px 5px 5px;
+}
+.map-box {
+  margin-left: 300px;
+  /*height: calc(100% - 250px);*/
+  height: 100%;
+  border: 1px solid $border-color;
+}
+.table-box {
+  position: relative;
+  margin-left: 300px;
+  height: 250px;
+  border-left: 1px solid #cccccc;
+  box-sizing: border-box;
+}
+.table-title {
+  position: absolute;
+  height: 30px;
+  width: 200px;
+  top: -30px;
+  left: 0;
+  background-color: $border-color;
+  color: #ffffff;
+  text-align: center;
+  line-height: 30px;
+  font-size: 16px;
+  font-weight: 600;
+}
+.tab-title {
+  display: inline-block;
+  width: 90px;
+}
+.tab-content {
+  display: inline-block;
+  text-align: center;
+  &.car {
+    width: 50px;
+  }
+  &.waring {
+    width: 55px;
+  }
+}
+</style>

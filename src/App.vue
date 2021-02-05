@@ -1,0 +1,180 @@
+<template>
+  <div id="app">
+    <router-view></router-view>
+  </div>
+</template>
+
+<script>
+import HelloWorld from './components/HelloWorld.vue'
+
+export default {
+  name: 'app',
+  components: {
+    HelloWorld
+  }
+}
+</script>
+
+<style lang="scss">
+@import './assets/css/tongwoo';
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+#app {
+  height: 100%;
+  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.mapDialog {
+  background: rgba(27, 30, 61, 0.9);
+  .mapToolPanel {
+    padding: 10px;
+    /*width: 450px;*/
+    Hyper {
+      display: block;
+      border: 1px solid #475f82;
+    }
+
+    HyperCircle {
+      position: relative;
+      display: block;
+      border: 1px solid #475f82;
+    }
+
+    HyperCircle:before,
+    HyperCircle:after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      margin: -3px;
+      border-radius: 50%;
+      background: #cceaf2;
+    }
+
+    HyperCircle:before {
+      left: 0;
+    }
+
+    HyperCircle:after {
+      right: 0;
+    }
+
+    TitleCircle {
+      position: relative;
+      display: block;
+      line-height: 35px;
+      font-size: 15px;
+      font-weight: bold;
+      text-align: center;
+      text-shadow: -1px 0 0 #1f5eb0;
+      color: #a0c5df;
+    }
+    TitleCircle > .icon-close {
+      position: absolute;
+      top: 50%;
+      right: 5px;
+      width: 30px;
+      margin-top: -17px;
+      cursor: pointer;
+    }
+    TitleCircle > .icon-close:hover {
+      color: #fff;
+      background: #e81123;
+    }
+  }
+}
+.dijitTooltipContainer {
+  border: 1px solid #ffffff;
+  .dijitTooltipFocusNode {
+    padding: 0;
+  }
+}
+.dijitTooltipBelow {
+  padding-top: 0;
+}
+.normBox {
+  position: relative;
+  margin-left: 50px;
+  margin-right: 20px;
+  text-align: center;
+  margin-bottom: 17px;
+}
+.normBox[type='left'] {
+  position: static;
+  margin-left: 0;
+  padding: 10px 10px;
+  border-left: 1px solid #465d7e;
+  text-align: left;
+}
+.normBox[type='right'] {
+  position: static;
+  margin-left: 25;
+  padding: 10px 10px;
+  border-left: 1px solid #465d7e;
+  text-align: left;
+}
+.normTitle {
+  line-height: 28px;
+  font-size: 20px;
+  color: #96d0ee;
+}
+.normBox[type='left'] .normTitle {
+  line-height: 23px;
+  font-size: 13px;
+  font-weight: bold;
+  color: #cdebf3;
+}
+.normBox > Hyper {
+  border: 1px solid #96d0ee;
+}
+.normInfo {
+  line-height: 23px;
+  font-size: 12px;
+  text-shadow: 1px 0 0 #d47a3f;
+  color: #e7bd55;
+}
+.normBox[type='left'] .normInfo {
+  line-height: 20px;
+  font-size: 16px;
+  text-shadow: 1px 0 0 #66778c;
+  color: #cdebf3;
+}
+.normBox[type='left'] .normInfo > .intensify {
+  line-height: inherit;
+  margin-right: 5px;
+  font-size: inherit;
+  text-shadow: inherit;
+  color: inherit;
+}
+.normInfo > .intensify {
+  line-height: 32px;
+  font-size: 24px;
+}
+.normBox[type='left']:before {
+  display: none;
+}
+.rowbox {
+  .normBox {
+    float: left;
+  }
+}
+.tw-moreinfo-table {
+  tbody {
+    tr {
+      &:hover {
+        .cell {
+          white-space: normal;
+        }
+      }
+      .cell {
+        white-space: nowrap;
+      }
+    }
+  }
+}
+</style>

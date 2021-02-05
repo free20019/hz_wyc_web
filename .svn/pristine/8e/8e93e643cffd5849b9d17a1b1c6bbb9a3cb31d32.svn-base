@@ -1,0 +1,169 @@
+<!--异常经营分析-->
+<template>
+  <div class="tw-template-wrapper">
+    <el-form :inline="true" :model="query" size="small" class="tw-query-bar" ref="queryBar">
+      <el-form-item>
+        <el-date-picker v-model="query.time" type="date" placeholder="选择日期"></el-date-picker>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="getDataList" :loading="table.loading">查询</el-button>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="handleExportClick">导出</el-button>
+      </el-form-item>
+    </el-form>
+    <div class="tw-query-panel" ref="queryPanel">
+      <el-table
+        class="tw-table tw-moreinfo-table"
+        :data="table.data"
+        v-loading="table.loading"
+        border
+        stripe
+        height="calc(100%)"
+        :default-sort="{ prop: 'CAR_NUM', order: 'descending' }"
+      >
+        <el-table-column type="index" align="center" label="序号" width="60"></el-table-column>
+        <el-table-column prop="COMPANYNAME" align="center" label="平台名称" min-width="160"></el-table-column>
+        <el-table-column prop="CAR_NUM" align="center" sortable label="动态车辆数" width="140"></el-table-column>
+        <el-table-column prop="YBZS" align="center" label="车辆已办证数" width="180"></el-table-column>
+        <el-table-column prop="DRIVER_NUM" align="center" label="动态驾驶员数" width="160"></el-table-column>
+        <el-table-column prop="DRIVER_LICENSE_NUM" align="center" label="驾驶员已办证数" width="160"></el-table-column>
+        <el-table-column prop="DAY_ORDER" align="center" label="今日订单数" width="160"></el-table-column>
+        <el-table-column prop="COMPLIANCE_ORDER" align="center" label="双合规订单数" width="140"></el-table-column>
+        <el-table-column prop="COMPLIANCE_RATE" align="center" label="合规率" width="140"></el-table-column>
+        <el-table-column prop="COMPLIANCE_PEOPLE" align="center" label="双合规人车数" width="140"></el-table-column>
+        <el-table-column prop="CAR_COMPLIANCE_ORDER" align="center" label="车合规订单数" width="140"></el-table-column>
+        <el-table-column
+          prop="PEOPLE_COMPLIANCE_ORDER"
+          align="center"
+          label="人合规订单数"
+          width="140"
+        ></el-table-column>
+        <!-- <el-table-column prop="PEOPLE_COMPLIANCE_NUM" align="center" label="人合规人员数" width="140"></el-table-column> -->
+        <el-table-column prop="VIOLATION_ORDER" align="center" label="双违规订单数" width="140"></el-table-column>
+        <!-- <el-table-column
+          prop="VIOLATION_PEOPLE"
+          label="双违规人车数"
+          align="center"
+          width="140"
+          :resizable="false"
+          min-width="180"
+        ></el-table-column> -->
+      </el-table>
+      <!-- <el-pagination
+        background
+        :page-size="table.pageSize"
+        :current-page="table.currentPage"
+        :total="table.total"
+        @current-change="handleTablePageCurrentChange"
+      ></el-pagination> -->
+    </div>
+  </div>
+</template>
+
+<script>
+import _ from 'underscore'
+import axios from 'axios'
+import moment from 'moment'
+import { templateHeight } from '../../../assets/js/util'
+
+export default {
+  name: 'AnalysisAbnormalOperation',
+  data() {
+    return {
+      query: {
+        time: ''
+      },
+      table: {
+        data: [],
+        loading: false,
+        pageSize: 15,
+        currentPage: 1,
+        total: 0
+      }
+    }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      const elements = this.$refs['queryBar'].$el
+      templateHeight(this.$refs['queryPanel'], elements)
+      this.query.time = moment()
+        .subtract(1, 'days')
+        .format('YYYY-MM-DD')
+      this.getDataList()
+    })
+  },
+  computed: {
+    filterAnalysisList() {
+      const { data, pageSize, currentPage } = this.table
+      const pageIndex = currentPage - 1
+      return _.filter(data, (item, index) => {
+        return index >= pageIndex * pageSize && index < currentPage * pageSize
+      })
+    }
+  },
+  methods: {
+    /*接口*/
+    getDataList() {
+      if (!this.query.time || this.query.time == '') {
+        this.$message({
+          message: '请选择时间',
+          type: 'warning'
+        })
+      } else {
+        this.table.loading = true
+        let idata = `postData={'time':'${moment(this.query.time).format('YYYY-MM-DD')}' }`
+        axios
+          .post('manage/findErrorOperate', idata, {
+            baseURL: this.baseURL
+          })
+          .then(res => {
+            let data = res.data
+            let tableData = data.datas || []
+            this.table.currentPage = 1
+            this.table.total = tableData.length
+            this.table.loading = false
+            let totalList = data.list
+            _.map(totalList, item => {
+              item.ID = 9552265188888
+            })
+            tableData.push(...totalList)
+            _.each(tableData, item => {
+              item.CAR_NUM = parseInt(item.CAR_NUM)
+            })
+            this.table.data = tableData
+
+            setTimeout(() => {
+              this.table.loading = false
+            }, 600)
+          })
+      }
+    },
+    //分页
+    handleTablePageCurrentChange(index) {
+      this.table.currentPage = index
+    },
+    //导出
+    handleExportClick() {
+      this.$confirm('是否需要导出?', '提示', {
+        confirmButtonText: '是',
+        cancelButtonText: '否',
+        cancelButtonClass: 'el-button--danger',
+        closeOnClickModal: false,
+        type: 'info',
+        center: true
+      })
+        .then(() => {
+          window.open(
+            `${this.baseURL}manage/exportErrorOperate?postData={'time':'${moment(this.query.time).format(
+              'YYYY-MM-DD'
+            )}'}`
+          )
+        })
+        .catch(() => {})
+    }
+  }
+}
+</script>
+
+<style scoped></style>

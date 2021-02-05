@@ -1,0 +1,89 @@
+@import "main";
+.template {
+  &-wrapper {
+    box-sizing: border-box;
+    padding: 10px;
+  }
+}
+.tw-my-layout {
+  &-left {
+    .header {
+      box-sizing: border-box;
+      padding-left: 5px;
+      padding-right: 5px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #cccccc;
+    }
+    .content {
+      box-sizing: border-box;
+      height: calc(100% - 41px);
+      padding: 10px 0;
+      .scroll-content {
+        padding: 0 10px;
+      }
+    }
+  }
+  &-main {
+    box-sizing: border-box;
+    .header {
+      box-sizing: border-box;
+      height: 70px;
+      padding: 10px;
+      border-bottom: 1px solid #cccccc;
+      box-sizing: border-box;
+      font-size: 28px;
+      line-height: 50px;
+      text-align: center;
+    }
+    .content {
+      box-sizing: border-box;
+      height: calc(100% - 70px);
+      padding: 10px 0 10px 10px;
+      .scroll-content {
+        padding: 0 10px 0 0;
+      }
+    }
+  }
+}
+
+.base-item {
+  position: relative;
+  height: 35px;
+  padding-left: 10px;
+  padding-right: 10px;
+  border-bottom: 1px solid #eeeeee;
+  cursor: pointer;
+
+  &:hover {
+    color: #ffffff;
+    background-color: #1492ff;
+    .item-tool {
+      display: block;
+    }
+  }
+  &.text-clear{
+    line-height: 0;
+  }
+  .item-title {
+    overflow: hidden;
+    font-size: 14px;
+    line-height: 35px;
+    white-space: nowrap;
+  }
+
+  .item-tool {
+    position: absolute;
+    top: 2px;
+    right: 10px;
+    display: none;
+    height: 100%;
+  }
+}
+
+.scrollbar-macosx {
+  height: 100%;
+}
+
+.form-control {
+  width: 100%;
+}

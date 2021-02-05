@@ -1,0 +1,161 @@
+<template>
+  <div class="template-wrapper">
+    <div class="login-logo">
+      <img src="../assets/img/login/p2.png" />
+    </div>
+    <div class="login-title">
+      <span>杭州市约租车监管平台</span>
+    </div>
+    <div class="login-title">
+      <img src="../assets/img/login/p3.png" />
+    </div>
+    <div class="login-info">
+      <el-input v-model="user.name" clearable>
+        <template slot="prepend">
+          <span>USERNAME :</span>
+        </template>
+      </el-input>
+    </div>
+    <div class="login-info">
+      <el-input
+        type="password"
+        :show-password="true"
+        v-model="user.password"
+        @keyup.enter.native="loginClick"
+        clearable
+      >
+        <template slot="prepend">
+          <span>PASSWORD :</span>
+        </template>
+      </el-input>
+    </div>
+    <div class="login-info">
+      <div class="info-content">
+        <div class="content-title">Verification</div>
+        <el-input maxlength="4" class="yzm-input" v-model="user.yzm" @keyup.enter.native="loginClick"></el-input>
+        <img @click="changeImg" class="content-img" height="60px" :src="imgSrc" />
+      </div>
+    </div>
+    <div class="login-info">
+      <el-button :loading="btnLoading" @click="loginClick">LOGIN</el-button>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+import { secondMenu } from '../assets/js/menu.comfig2'
+import _ from 'underscore'
+
+export default {
+  name: 'NewLogin',
+  data() {
+    return {
+      user: {
+        name: '',
+        password: '',
+        yzm: ''
+      },
+      imgSrc: '',
+      flag: -1,
+      routerList: [],
+      btnLoading: false
+    }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.imgSrc = this.baseURL + 'VerifyCodeServlet?'+Math.random()
+    })
+  },
+  methods: {
+    changeImg() {
+      this.imgSrc = ''
+      setTimeout(() => {
+        this.imgSrc = this.baseURL + 'VerifyCodeServlet?'+Math.random()
+      }, 10)
+    },
+    loginClick() {
+      this.btnLoading = true
+      const baseURL = this.baseURL
+      // let qxParams = new URLSearchParams()
+      // qxParams.append('username', this.user.name)
+      // axios.post('user/getUserPower', qxParams, { baseURL }).then(res => {
+      //   this.btnLoading = false
+      //   if (res.data.length == 0) {
+      //     this.$message.error('无权限')
+      //   } else {
+      //     this.$cookies.set('username', this.user.name, 0)
+      //     let qxStr = res.data[0].QX.split(',')
+      //     this.routerList = []
+      //     if (res.data[0].QX.indexOf('yingyunzonglan') > -1) this.$router.push({ path: '/yingyunzonglan' })
+      //     else {
+      //       this.formateHRouterList(qxStr[0], JSON.parse(JSON.stringify(secondMenu)))
+      //       if (this.routerList.length === 0) this.formateHRouterList(qxStr[1], JSON.parse(JSON.stringify(secondMenu)))
+      //       this.$router.push({ path: this.routerList[0].href })
+      //     }
+      //   }
+      // })
+      // -------------------------
+      const params = new URLSearchParams()
+      params.append('username', this.user.name)
+      params.append('password', this.user.password)
+      params.append('yzm', this.user.yzm)
+          axios.post('user/login', params, { baseURL }).then(res => {
+            if (res.data === '登陆成功') {
+              this.$cookies.set('username', this.user.name, 0)
+              this.$store.state.username = this.user.name
+              console.info('login')
+              this.$message({
+                message: res.data,
+                type: 'success'
+              })
+              let qxParams = new URLSearchParams()
+              qxParams.append('username', this.user.name)
+              axios.post('user/getUserPower', qxParams, { baseURL }).then(res => {
+                this.$cookies.set('wycname', res.data[0].XM, 0)
+                this.btnLoading = false
+                if (res.data.length == 0) {
+                  this.$message.error('无权限')
+                } else {
+                  let qxStr = res.data[0].QX.split(',')
+                  this.routerList = []
+                  if (res.data[0].QX.indexOf('yingyunzonglan') > -1) this.$router.push({ path: '/yingyunzonglan' })
+                  else {
+                    this.formateHRouterList(qxStr[0], JSON.parse(JSON.stringify(secondMenu)))
+                    if (this.routerList.length === 0)
+                      this.formateHRouterList(qxStr[1], JSON.parse(JSON.stringify(secondMenu)))
+                    this.$router.push({ path: this.routerList[0].href })
+                  }
+                }
+              })
+            } else {
+              this.$message.error(res.data)
+              this.btnLoading = false
+            }
+            this.user = {
+              name: '',
+              password: ''
+            }
+          })
+    },
+    formateHRouterList(str, list) {
+      _.each(list, item => {
+        if (item.children) {
+          this.formateHRouterList(str, item.children)
+        } else {
+          if (item.id === str) this.routerList.push(item)
+        }
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+@import '../assets/css/login';
+.template-wrapper {
+  background-image: url('../assets/img/login/p1.png');
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+</style>
